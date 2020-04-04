@@ -48,7 +48,7 @@ func writeHandler() {
 			log.Error("write msg failed: %v", err.Error())
 			continue
 		}
-		log.Info("send: %s", msg.Message.Message)
+		log.Info("send: %s", b)
 	}
 }
 

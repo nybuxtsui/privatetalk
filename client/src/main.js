@@ -5,14 +5,28 @@ import {
   Row,
   Col,
   Input,
+  Table,
+  TableColumn,
+  Container,
+  Header,
+  Aside,
+  Main,
+  Footer,
 } from 'element-ui';
 import App from './App.vue';
 
-Vue.component(Button.name, Button);
-Vue.component(Select.name, Select);
-Vue.component(Row.name, Row);
-Vue.component(Col.name, Col);
-Vue.component(Input.name, Input);
+Vue.use(Button);
+Vue.use(Select);
+Vue.use(Row);
+Vue.use(Col);
+Vue.use(Input);
+Vue.use(Table);
+Vue.use(TableColumn);
+Vue.use(Container)
+Vue.use(Header)
+Vue.use(Aside)
+Vue.use(Main)
+Vue.use(Footer)
 
 Vue.config.productionTip = false
 

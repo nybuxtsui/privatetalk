@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/gorilla/websocket"
 	"github.com/nybuxtsui/log"
 )
@@ -101,9 +99,9 @@ func (lobby *Lobby) worker() {
 				} else {
 					room.sendMsg(
 						"leave",
+						msg.SenderId,
+						msg.SenderName,
 						"",
-						"system",
-						fmt.Sprintf("%v(%v)离开聊天室", msg.SenderName, msg.SenderId),
 					)
 				}
 			}
