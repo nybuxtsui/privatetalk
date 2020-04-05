@@ -52,25 +52,48 @@
             }
         },
         mounted: function() {
-            MessageBox.prompt('请输入用户名', '提示', {
-            }).then(({ value }) => {
+            MessageBox.prompt('请输入用户名', '提示', {}).then(({ value }) => {
                 if (value == null || value == "") {
                     value = "noname"
                 } else {
                     value = value.trim()
                 }
-                ws = new WebSocket("ws://127.0.0.1/chat?username="+value+"&roomid=def");
-                ws.onmessage = this.onMessage;
+                this.createWs(value)
             }).catch(() => {
-                var value = "noname"
-                ws = new WebSocket("ws://127.0.0.1/chat?username="+value+"&roomid=def");
-                ws.onmessage = this.onMessage;
+                this.createWs('noname')
             });
         },
         methods: {
+            createWs(userName) {
+                var roomId = this.getUrlVars('roomid');
+                if (roomId === undefined) {
+                    roomId = new Date().getTime().toString() + "." + this.getRandomInt(100000).toString() + this.getRandomInt(100000).toString() + this.getRandomInt(100000).toString()
+                    window.history.pushState(null, null, window.location.href + '?roomid=' + roomId)
+                }
+                console.log('roomId:', roomId)
+                ws = new WebSocket(`ws://127.0.0.1/chat?username=${userName}&roomid=${roomId}`);
+                ws.onmessage = this.onMessage;
+            },
+            getRandomInt :function(max) {
+                return Math.floor(Math.random() * Math.floor(max));
+            },
+            getUrlVars :function(parameter) {
+                var vars = {};
+                window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                    vars[key] = value;
+                });
+                return vars[parameter];
+            },
+            addMsg: function(senderid, sendername, msg) {
+                this.msglist.push({'userid': senderid, 'username': sendername, 'msg': msg, 'datetime': nowStr()})
+            },
             onSend: function() {
-                this.msglist.unshift({'userid': '', 'username': '我', 'msg': this.msg, 'datetime': nowStr()})
-                ws.send(JSON.stringify({'type':'msg', 'msg': this.msg}))
+                var value = this.msg.trim();
+                if (value === "") {
+                    return;
+                }
+                this.addMsg('', '我', value)
+                ws.send(JSON.stringify({'type':'msg', 'msg': value}))
                 this.msg = '';
                 this.$refs.input.focus()
             },
@@ -85,13 +108,13 @@
                 var data = JSON.parse(evt.data);
                 switch (data.type) {
                     case 'msg':
-                        this.msglist.unshift({'userid': data.senderid, 'username': data.sendername, 'msg': data.msg, 'datetime': nowStr()})
+                        this.addMsg(data.senderid, data.sendername, data.msg);
                         break
                     case 'join':
-                        this.msglist.unshift({'userid': data.senderid, 'username': '', 'msg': `${data.sendername}(${data.senderid})加入聊天室`, 'datetime': nowStr()})
+                        this.addMsg(data.senderid, '', `${data.sendername}(${data.senderid})加入聊天室`)
                         break
                     case 'leave':
-                        this.msglist.unshift({'userid': data.senderid, 'username': '', 'msg': `${data.sendername}(${data.senderid})离开聊天室`, 'datetime': nowStr()})
+                        this.addMsg(data.senderid, '', `${data.sendername}(${data.senderid})离开聊天室`)
                         break
                 }
             }
